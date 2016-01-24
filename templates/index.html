@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="static/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="static/scrabble.css" type="text/css">
+<script type="text/javascript" src="static/jquery.min.js"></script>
+<script type="text/javascript" src="static/bootstrap.min.js"></script>
+<script type="text/javascript" src="static/scrabble.js"></script>
+</head>
+<body>
+<form name="letters" method="GET" action="/words/">
+    <div class="form-group my-letters">
+        <label for="my-letters" class="control-label">Мои буквы</label>
+        <input type="text" id="my-letters" class="form-control" name="my_letters" />
+    </div>
+    <div class="form-group board-letters">
+        <label for="board-letters" class="control-label">Буква(ы) на доске</label>
+        <input type="text" id="board-letters" class="form-control" name="board_letters" />
+    </div>
+    <button class="btn btn-primary" type="submit">Слова</button>
+</form>
+<table id="words" class='table'>
+</table>
+</body>
+</html>
