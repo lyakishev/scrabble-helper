@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import re
 import os
 from operator import itemgetter
 
@@ -47,31 +48,56 @@ with open('dicts/zdb.txt') as f:
     WORDS = [word.decode('utf8').strip() for word in f]
 
 
+def get_word_cost_if_match(word, letters, dots):
+    word_len = len(word)
+    cost = 0
+    for c in letters:
+        word = word.replace(c, '', 1)
+        new_word_len = len(word)
+        if new_word_len < word_len:
+            cost += COSTS[c]
+        if not word:
+            break
+        word_len = new_word_len
+
+    if len(word) <= dots:
+        return cost
+
+
 def find_words(letters, board_string):
     dots = letters.count('.')
     min_len = len(board_string) + 1
     max_len = len(letters) + min_len - 1
     letters = letters.replace('.', '')
+    re_board = re.compile(board_string) if '.' in board_string else None
 
     for word in WORDS:
         word_len = len(word)
-
-        if word_len > max_len or word_len < min_len:
+        if word_len < min_len or word_len > max_len:
             continue
 
-        test_word = word
-        if board_string:
-            test_word = test_word.replace(board_string, '', 1)
-            if len(test_word) == len(word):
-                continue
+        if re_board:
+            for i in range(len(word)):
+                match = re_board.match(word[i:])
+                if match:
+                    start, end = match.span()
+                    start += i
+                    end += i
+                    test_word = word[:start] + word[end:]
+                    cost = get_word_cost_if_match(test_word, letters, dots)
+                    if cost is not None:
+                        yield word, cost, [start, end]
+        else:
+            test_word = word
 
-        for c in letters:
-            test_word = test_word.replace(c, '', 1)
-            if not test_word:
-                break
+            if board_string:
+                test_word = test_word.replace(board_string, '', 1)
+                if len(test_word) == len(word):
+                    continue
 
-        if len(test_word) <= dots:
-            yield word
+            cost = get_word_cost_if_match(test_word, letters, dots)
+            if cost is not None:
+                yield word, cost + sum(COSTS[c] for c in board_string), None
 
 
 @route('/')
@@ -87,23 +113,12 @@ def static(filename):
                           'static'))
 
 
-def get_word_cost(word, letters, board_letters):
-    cost = sum(COSTS.get(c, 0) for c in board_letters)
-    word = word.replace(board_letters, '', 1)
-    for c in word:
-        if c in letters:
-            cost += COSTS.get(c, 0)
-            letters = letters.replace(c, '', 1)
-    return cost
-
-
 @route('/words/')
 def get_words():
     my_letters = request.query['my_letters'].decode('utf8')
     board_letters = request.query['board_letters'].decode('utf8')
-    words = [[word, get_word_cost(word, my_letters, board_letters)]
-             for word in find_words(my_letters, board_letters)]
-    words.sort(key=itemgetter(1), reverse=True)
+    words = sorted(find_words(my_letters, board_letters), key=itemgetter(1, 0),
+                   reverse=True)
     from bottle import response
     from json import dumps
     response.content_type = 'application/json'
