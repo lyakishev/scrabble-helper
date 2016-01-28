@@ -12,7 +12,13 @@
     <table class="table">
         {{#each data}}
         <tr>
-            <td class="word">{{  word  }}</td>  
+            <td class="word">
+                {{#if span }}
+                {{#wordSpan word span}}{{/wordSpan}}
+                {{else}}
+                {{  word  }}
+                {{/if}}
+            </td>
             <td>{{  cost  }}</td>  
             <td> 
                 <a class="word-def"

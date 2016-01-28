@@ -1,4 +1,17 @@
 $(function () {
+    Handlebars.registerHelper('wordSpan', function (word, span) {
+        var parts = [];
+        for (var i=0; i<word.length; i++) {
+            if (i == span[0]) {
+                parts.push('<strong>')
+            } else if (i == span[1]) {
+                parts.push('</strong>')
+            }
+            parts.push(word[i])
+        }
+        return new Handlebars.SafeString(parts.join(''));
+    });
+
     var template = Handlebars.compile($("#word-template").html()),
         form = $('form'),
         letters,
