@@ -4,7 +4,10 @@ import re
 import os
 from operator import itemgetter
 
-from bottle import route, run, template, request, static_file
+from bottle import route, run, request, static_file
+
+
+ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
 COSTS = {
@@ -102,15 +105,12 @@ def find_words(letters, board_string):
 
 @route('/')
 def index():
-    return template('templates/index.html')
+    return static_file('index.html', root=os.path.join(ROOT, 'templates'))
 
 
 @route('/static/<filename>')
 def static(filename):
-    return static_file(
-        filename,
-        root=os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                          'static'))
+    return static_file(filename, root=os.path.join(ROOT, 'static'))
 
 
 @route('/words/')
@@ -122,6 +122,8 @@ def get_words():
     from bottle import response
     from json import dumps
     response.content_type = 'application/json'
-    return dumps(words)
+    return dumps({'data': [{'word': word, 'cost': cost, 'span': span}
+                           for word, cost, span in words]})
+
 
 run(host='0.0.0.0', port=8080)
