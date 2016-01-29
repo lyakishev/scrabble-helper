@@ -12,12 +12,8 @@
     <table class="table">
         {{#each data}}
         <tr>
-            <td class="word">
-                {{#if span }}
-                {{#wordSpan word span}}{{/wordSpan}}
-                {{else}}
-                {{  word  }}
-                {{/if}}
+            <td class="word" onboard="{{ onboard }}">
+                {{#wordRepr word onboard}}{{/wordRepr}}
             </td>
             <td>{{  cost  }}</td>  
             <td> 
@@ -31,14 +27,14 @@
 </script>
 </head>
 <body>
-<form name="letters" method="GET" action="/words/">
-    <div class="form-group my-letters">
-        <label for="my-letters" class="control-label">Мои буквы</label>
-        <input type="text" id="my-letters" class="form-control" name="my_letters" />
+<form name="scrabble" method="GET" action="/words/">
+    <div class="form-group letters">
+        <label for="letters" class="control-label">Мои буквы</label>
+        <input type="text" id="letters" class="form-control" name="letters" />
     </div>
-    <div class="form-group board-letters">
-        <label for="board-letters" class="control-label">Буква(ы) на доске</label>
-        <input type="text" id="board-letters" class="form-control" name="board_letters" />
+    <div class="form-group board-strings">
+        <label for="board-strings" class="control-label">Буква(ы) на доске</label>
+        <input type="text" id="board-strings" class="form-control" name="board_strings" />
     </div>
     <button class="btn btn-primary" type="submit">Слова</button>
 </form>

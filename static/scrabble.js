@@ -1,28 +1,21 @@
 $(function () {
-    Handlebars.registerHelper('wordSpan', function (word, span) {
-        var parts = [];
-        for (var i=0; i<word.length; i++) {
-            if (i == span[0]) {
-                parts.push('<strong>')
-            } else if (i == span[1]) {
-                parts.push('</strong>')
-            }
-            parts.push(word[i])
-        }
-        return new Handlebars.SafeString(parts.join(''));
+    Handlebars.registerHelper('wordRepr', function (word, onboard) {
+        word = word.replace(new RegExp(onboard, 'g'),
+            '<strong>' + onboard + '</strong>')
+        return new Handlebars.SafeString(word);
     });
 
     var template = Handlebars.compile($("#word-template").html()),
         form = $('form'),
-        letters,
-        b_letters;
+        //b_letters,
+        letters;
 
     form.submit(function (e) {
         e.preventDefault();
         var words = $('#words');
         words.empty();
-        letters = $('#my-letters').val();
-        b_letters = $('#board-letters').val();
+        letters = $('#letters').val();
+        //b_letters = $('#board-strings').val();
         $.ajax({
             url: form.attr('action'),
             data: form.serialize(),
@@ -33,14 +26,15 @@ $(function () {
         });
     });
     $('#words').on('click', '.word', function (e) {
-        var word = $(this).text().replace(b_letters, '', 1);
-        var new_letters = letters;
+        var $word = $(this),
+            word = $.trim($word.text()).replace($word.attr('onboard'), '', 1),
+            new_letters = letters;
         $.each(word.split(''), function (idx, c) {
             if (new_letters.indexOf(c) === -1) {
                 c = '.';
             }
             new_letters = new_letters.replace(c, '', 1)
         })
-        $('#my-letters').val(new_letters);
+        $('#letters').val(new_letters);
     });
 });

@@ -80,16 +80,18 @@ def find_words(letters, board_string):
             continue
 
         if re_board:
+            matched_strings = set()
             for i in range(len(word)):
                 match = re_board.match(word[i:])
                 if match:
-                    start, end = match.span()
-                    start += i
-                    end += i
-                    test_word = word[:start] + word[end:]
+                    matched_string = match.group(0)
+                    if matched_string in matched_strings:
+                        continue
+                    matched_strings.add(matched_string)
+                    test_word = word.replace(matched_string, '', 1)
                     cost = get_word_cost_if_match(test_word, letters, dots)
                     if cost is not None:
-                        yield word, cost, [start, end]
+                        yield word, cost, matched_string
         else:
             test_word = word
 
@@ -100,7 +102,8 @@ def find_words(letters, board_string):
 
             cost = get_word_cost_if_match(test_word, letters, dots)
             if cost is not None:
-                yield word, cost + sum(COSTS[c] for c in board_string), None
+                cost += sum(COSTS[c] for c in board_string)
+                yield word, cost, board_string
 
 
 @route('/')
@@ -115,15 +118,16 @@ def static(filename):
 
 @route('/words/')
 def get_words():
-    my_letters = request.query['my_letters'].decode('utf8')
-    board_letters = request.query['board_letters'].decode('utf8')
-    words = sorted(find_words(my_letters, board_letters), key=itemgetter(1, 0),
-                   reverse=True)
+    letters = request.query['letters'].decode('utf8')
+    board_strings = request.query['board_strings'].decode('utf8').split(' ')
+    words = sorted((word for board_string in board_strings
+                    for word in find_words(letters, board_string)),
+                   key=itemgetter(1, 0), reverse=True)
     from bottle import response
     from json import dumps
     response.content_type = 'application/json'
-    return dumps({'data': [{'word': word, 'cost': cost, 'span': span}
-                           for word, cost, span in words]})
+    return dumps({'data': [{'word': word, 'cost': cost, 'onboard': onboard}
+                           for word, cost, onboard in words]})
 
 
 run(host='0.0.0.0', port=8080)
