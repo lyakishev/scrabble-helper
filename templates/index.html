@@ -13,7 +13,11 @@
         {{#each data}}
         <tr>
             <td class="word" onboard="{{ onboard }}">
+            {{#if onboard }}
                 {{#wordRepr word onboard}}{{/wordRepr}}
+            {{else}}
+                {{ word }}
+            {{/if}}
             </td>
             <td>{{  cost  }}</td>  
             <td> 
